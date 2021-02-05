@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IL_2.Air.Traffic.Controller.ATC
@@ -68,6 +69,10 @@ namespace IL_2.Air.Traffic.Controller.ATC
                 }
                 Console.WriteLine("IAM-Token Updatetd: " + LastRequestIamToken.ToShortDateString() + " " + LastRequestIamToken.ToLongTimeString());
             }
+            else
+            {
+                Console.WriteLine("Error! Status Code: " + response.StatusCode);
+            }
         }
         /// <summary>
         /// Связывается с сервисом Yandex.Cloud отправляет текст и получает в ответ файл, который передается в SRS
@@ -76,11 +81,7 @@ namespace IL_2.Air.Traffic.Controller.ATC
         /// <returns></returns>
         public async Task Tts(Speech speech)
         {
-            var dateend = LastRequestIamToken.AddHours(1);
-            if(dateend < DateTime.Now)
-            {
-                await UpdateIamToken();
-            }
+            await UpdateIamToken();
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("Authorization", "Bearer " + IamToken);
             var speed = Math.Round(speech.Speed, 1);
@@ -89,7 +90,7 @@ namespace IL_2.Air.Traffic.Controller.ATC
                 { "text", speech.Message },
                 { "voice", speech.Voice },
                 { "emotion", speech.Emotion },
-                { "speed", speed.ToString() },
+                { "speed", speed.ToString().Replace(",", ".") },
                 { "lang", speech.Lang },
                 { "format", "lpcm" },
                 { "sampleRateHertz", "48000" },
@@ -117,7 +118,7 @@ namespace IL_2.Air.Traffic.Controller.ATC
             var freq = Math.Round(speech.Frequency, 1).ToString();
             var coal = speech.Coalition;
             var pathMp3 = AppDomain.CurrentDomain.BaseDirectory + @"speech.mp3";
-            var argstr = pathMp3 + " " + freq + " AM " + coal + " 6002 " + speech.NameSpeaker + " 1.0";
+            var argstr = pathMp3 + " " + freq + " AM " + coal + " 6002 " + speech.NameSpeaker.Replace(" ", "-").Replace("   ", "-") + " 1.0";
             Process process = new Process();
             ProcessStartInfo processStartInfo = new ProcessStartInfo(AppSet.Config.DirSRS + @"\IL2-SRS-External-Audio.exe", argstr);
             processStartInfo.WorkingDirectory = AppSet.Config.DirSRS;

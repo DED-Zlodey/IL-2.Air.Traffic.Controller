@@ -66,7 +66,7 @@ namespace IL_2.Air.Traffic.Controller.ATC
                 foreach(var item in state)
                 {
                     var ent = db.Speech.First(x => x.id == item.id);
-                    Console.WriteLine(DateTime.Now + " |INFO| " + ent.RecipientMessage + " " + ent.Message);
+                    Console.WriteLine(DateTime.Now + " |INFO| " + ent.RecipientMessage + " " + ent.Message +  " " + ent.Frequency + " " + ent.Lang);
                     Program.QSpeech.Enqueue(item);
                     db.Speech.Remove(ent);
                 }

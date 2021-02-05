@@ -3,7 +3,6 @@ using IL_2.Air.Traffic.Controller.Data;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace IL_2.Air.Traffic.Controller
 {
@@ -27,7 +26,7 @@ namespace IL_2.Air.Traffic.Controller
             }
             Console.ReadKey(true);
         }
-        private static void TimerCallback(Object o)
+        private async static void TimerCallback(Object o)
         {
             if(Occupied)
             {
@@ -36,13 +35,10 @@ namespace IL_2.Air.Traffic.Controller
                     Occupied = false;
                     Console.WriteLine(DateTime.Now);
                     var ent = QSpeech.Dequeue();
-                    Action actionwDB = () =>
-                    {
-                        dispatcher.Tts(ent);
-                    };
-                    Task taskwDB = Task.Factory.StartNew(actionwDB);
+                    await dispatcher.Tts(ent);
                 }
             }
+            GC.Collect();
         }
     }
 }
