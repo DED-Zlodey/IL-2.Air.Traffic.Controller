@@ -21,11 +21,12 @@ namespace IL_2.Air.Traffic.Controller
                 {
 
                 }
-                Timer t = new Timer(TimerCallback, null, 0, 1000);
+                Timer t = new Timer(TimerCallback, null, 0, 5000);
                 Console.WriteLine("Waiting for a task...............");
             }
             Console.ReadKey(true);
         }
+
         private async static void TimerCallback(Object o)
         {
             if(Occupied)

@@ -99,15 +99,22 @@ namespace IL_2.Air.Traffic.Controller.ATC
             var sampleRate = 48000;
             var content = new FormUrlEncodedContent(values);
             var response = await client.PostAsync("https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize", content);
-            var responseBytes = await response.Content.ReadAsByteArrayAsync();
-            var ms = new MemoryStream(responseBytes);
-            var rs = new RawSourceWaveStream(ms, new WaveFormat(sampleRate, 16, 1));
-            var outpath = "example.wav";
-            WaveFileWriter.CreateWaveFile(outpath, rs);
-            using (var reader = new AudioFileReader("example.wav"))
-            using (var writer = new LameMP3FileWriter("speech.mp3", reader.WaveFormat, 192))
-                reader.CopyTo(writer);
-            SendToSRS(speech);
+            if(response.IsSuccessStatusCode)
+            {
+                var responseBytes = await response.Content.ReadAsByteArrayAsync();
+                var ms = new MemoryStream(responseBytes);
+                var rs = new RawSourceWaveStream(ms, new WaveFormat(sampleRate, 16, 1));
+                var outpath = "example.wav";
+                WaveFileWriter.CreateWaveFile(outpath, rs);
+                using (var reader = new AudioFileReader("example.wav"))
+                using (var writer = new LameMP3FileWriter("speech.mp3", reader.WaveFormat, 192))
+                    reader.CopyTo(writer);
+                SendToSRS(speech);
+            }
+            else
+            {
+                Console.WriteLine("Error! Status Code: " + response.StatusCode);
+            }
         }
         /// <summary>
         /// Отправляет в SRS файл speech.mp3
