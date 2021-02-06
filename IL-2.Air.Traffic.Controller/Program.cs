@@ -21,7 +21,7 @@ namespace IL_2.Air.Traffic.Controller
                 {
 
                 }
-                Timer t = new Timer(TimerCallback, null, 0, 5000);
+                Timer t = new Timer(TimerCallback, null, 0, 2000);
                 Console.WriteLine("Waiting for a task...............");
             }
             Console.ReadKey(true);
