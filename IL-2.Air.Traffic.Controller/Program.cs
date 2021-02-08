@@ -1,7 +1,11 @@
 ﻿using IL_2.Air.Traffic.Controller.ATC;
 using IL_2.Air.Traffic.Controller.Data;
+using IL_2.Air.Traffic.Controller.SRS;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Threading;
 
 namespace IL_2.Air.Traffic.Controller
@@ -11,6 +15,7 @@ namespace IL_2.Air.Traffic.Controller
         private static AirDispatcher dispatcher;
         public static Queue<Speech> QSpeech = new Queue<Speech>();
         public static bool Occupied { get; set; } = true;
+        public static ClientsSRS ClientsSRS { get; set; }
         static void Main(string[] args)
         {
             AppSet.SetUp();
@@ -26,7 +31,6 @@ namespace IL_2.Air.Traffic.Controller
             }
             Console.ReadKey(true);
         }
-
         private async static void TimerCallback(Object o)
         {
             if(Occupied)
@@ -38,8 +42,29 @@ namespace IL_2.Air.Traffic.Controller
                     var ent = QSpeech.Dequeue();
                     await dispatcher.Tts(ent);
                 }
+                else
+                {
+                    Occupied = false;
+                    UpdateListSRSClients();
+                    Occupied = true;
+                }
             }
             GC.Collect();
+        }
+        private static void UpdateListSRSClients()
+        {
+            try
+            {
+                var json = string.Empty;
+                using (var fs = File.OpenRead(AppSet.Config.DirSRS + @"\clients-list.json"))
+                using (var sr = new StreamReader(fs, new UTF8Encoding(false)))
+                    json = sr.ReadToEnd();
+                ClientsSRS = JsonConvert.DeserializeObject<ClientsSRS>(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }

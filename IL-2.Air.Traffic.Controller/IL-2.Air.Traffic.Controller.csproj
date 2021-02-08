@@ -146,6 +146,10 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SRS\ClientsSRS.cs" />
+    <Compile Include="SRS\ListSRSClients.cs" />
+    <Compile Include="SRS\PlayerGameState.cs" />
+    <Compile Include="SRS\RadioInformation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

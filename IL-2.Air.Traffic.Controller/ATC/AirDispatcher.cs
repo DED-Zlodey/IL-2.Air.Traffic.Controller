@@ -1,4 +1,5 @@
 ﻿using IL_2.Air.Traffic.Controller.Data;
+using IL_2.Air.Traffic.Controller.SRS;
 using NAudio.Lame;
 using NAudio.Wave;
 using Newtonsoft.Json.Linq;
@@ -74,11 +75,93 @@ namespace IL_2.Air.Traffic.Controller.ATC
             }
         }
         /// <summary>
-        /// Связывается с сервисом Yandex.Cloud отправляет текст и получает в ответ файл, который передается в SRS
+        /// Проверяет наличие клиента в SRS. Если клиент есть, вызывает метод TextToSpeech()
         /// </summary>
         /// <param name="speech">Объект содержащий данные для вывода голосового сообщения</param>
         /// <returns></returns>
         public async Task Tts(Speech speech)
+        {
+            if (speech.RecipientMessage.Equals("All"))
+            {
+                bool Red = false;
+                bool Blue = false;
+                bool Red1Ch = false;
+                bool Red2Ch = false;
+                bool Blue1Ch = false;
+                bool Blue2Ch = false;
+                foreach (var item in Program.ClientsSRS.Clients)
+                {
+                    if(item.Coalition == 1)
+                    {
+                        Red = true;
+                        if (item.GameState.radios[1].freq == 251000000.0)
+                        {
+                            Red1Ch = true;
+                        }
+                        if (item.GameState.radios[1].freq == 252000000.0)
+                        {
+                            Red2Ch = true;
+                        }
+                    }
+                    if (item.Coalition == 2)
+                    {
+                        Blue = true;
+                        if (item.GameState.radios[1].freq == 251000000.0)
+                        {
+                            Blue1Ch = true;
+                        }
+                        if (item.GameState.radios[1].freq == 252000000.0)
+                        {
+                            Blue2Ch = true;
+                        }
+                    }
+                }
+                if(speech.Lang.Equals("en-US") && speech.Coalition == 1 && Red1Ch)
+                {
+                    await TextToSpeech(speech);
+                }
+                if (speech.Lang.Equals("en-US") && speech.Coalition == 2 && Blue1Ch)
+                {
+                    await TextToSpeech(speech);
+                }
+                if (speech.Lang.Equals("ru-RU") && speech.Coalition == 1 && Red2Ch)
+                {
+                    await TextToSpeech(speech);
+                }
+                if (speech.Lang.Equals("ru-RU") && speech.Coalition == 2 && Blue2Ch)
+                {
+                    await TextToSpeech(speech);
+                }
+            }
+            else
+            {
+                ListSRSClients clientsrs = new ListSRSClients();
+                foreach (var item in Program.ClientsSRS.Clients)
+                {
+                    if (item.Name.Equals(speech.RecipientMessage))
+                    {
+                        clientsrs = item;
+                    }
+                }
+                if (clientsrs != null)
+                {
+                    if (clientsrs.GameState.radios[1].freq == 251000000.0 && speech.Lang.Equals("en-US"))
+                    {
+                        await TextToSpeech(speech);
+                    }
+                    if (clientsrs.GameState.radios[1].freq == 252000000.0 && speech.Lang.Equals("ru-RU"))
+                    {
+                        await TextToSpeech(speech);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Связывается с сервисом Yandex.Cloud отправляет текст и получает в ответ файл, который передается в SRS
+        /// </summary>
+        /// <param name="speech">Объект содержащий данные для вывода голосового сообщения</param>
+        /// <returns></returns>
+        public async Task TextToSpeech(Speech speech)
         {
             await UpdateIamToken();
             HttpClient client = new HttpClient();
@@ -98,7 +181,7 @@ namespace IL_2.Air.Traffic.Controller.ATC
             var sampleRate = 48000;
             var content = new FormUrlEncodedContent(values);
             var response = await client.PostAsync("https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize", content);
-            if(response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 var responseBytes = await response.Content.ReadAsByteArrayAsync();
                 var ms = new MemoryStream(responseBytes);
