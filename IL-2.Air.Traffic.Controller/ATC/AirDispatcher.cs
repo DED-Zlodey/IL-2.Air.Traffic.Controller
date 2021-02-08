@@ -83,8 +83,6 @@ namespace IL_2.Air.Traffic.Controller.ATC
         {
             if (speech.RecipientMessage.Equals("All"))
             {
-                bool Red = false;
-                bool Blue = false;
                 bool Red1Ch = false;
                 bool Red2Ch = false;
                 bool Blue1Ch = false;
@@ -93,7 +91,6 @@ namespace IL_2.Air.Traffic.Controller.ATC
                 {
                     if(item.Coalition == 1)
                     {
-                        Red = true;
                         if (item.GameState.radios[1].freq == 251000000.0)
                         {
                             Red1Ch = true;
@@ -105,7 +102,6 @@ namespace IL_2.Air.Traffic.Controller.ATC
                     }
                     if (item.Coalition == 2)
                     {
-                        Blue = true;
                         if (item.GameState.radios[1].freq == 251000000.0)
                         {
                             Blue1Ch = true;
@@ -132,6 +128,10 @@ namespace IL_2.Air.Traffic.Controller.ATC
                 {
                     await TextToSpeech(speech);
                 }
+                if(!Red1Ch && !Red2Ch && !Blue1Ch && !Blue2Ch)
+                {
+                    Program.Occupied = true;
+                }
             }
             else
             {
@@ -143,7 +143,7 @@ namespace IL_2.Air.Traffic.Controller.ATC
                         clientsrs = item;
                     }
                 }
-                if (clientsrs != null)
+                if (clientsrs.GameState != null)
                 {
                     if (clientsrs.GameState.radios[1].freq == 251000000.0 && speech.Lang.Equals("en-US"))
                     {
@@ -153,6 +153,14 @@ namespace IL_2.Air.Traffic.Controller.ATC
                     {
                         await TextToSpeech(speech);
                     }
+                    if (!(clientsrs.GameState.radios[1].freq == 251000000.0 && speech.Lang.Equals("en-US") && !(clientsrs.GameState.radios[1].freq == 252000000.0 && speech.Lang.Equals("ru-RU"))))
+                    {
+                        Program.Occupied = true;
+                    }
+                }
+                else
+                {
+                    Program.Occupied = true;
                 }
             }
         }
