@@ -27,12 +27,14 @@ namespace IL_2.Air.Traffic.Controller.ATC
         /// Дата крайнего запроса IAM-токена. Время местное.
         /// </summary>
         public DateTime LastRequestIamToken { get; private set; }
+        private SqlWatcher sqlWatcher;
 
         /// <summary>
         /// Конструктор по умолчанию
         /// </summary>
         public AirDispatcher()
         {
+            sqlWatcher = new SqlWatcher();
             UpdateIamToken();
         }
         /// <summary>
